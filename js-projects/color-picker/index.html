@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color Picker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: grey;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .color-picker-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            width: 100%;
+            max-width: 800px;
+            text-align: center;
+        }
+
+        h1 {
+            color: white;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .color-display {
+            margin-bottom: 30px;
+        }
+
+        .current-color {
+            width: 200px;
+            height: 200px;
+            border-radius: 15px;
+            margin: 0 auto 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .color-info {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .color-value {
+            color: white;
+            font-size: 1.2rem;
+            font-family: 'Courier New', monospace;
+            margin-bottom: 10px;
+        }
+
+        .color-copy {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .color-copy:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .controls {
+            margin-bottom: 30px;
+        }
+
+        .control-group {
+            margin-bottom: 20px;
+        }
+
+        .control-label {
+            color: white;
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: white;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .slider-value {
+            color: white;
+            font-size: 1rem;
+            margin-top: 5px;
+        }
+
+        .hex-input {
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            font-size: 1rem;
+            width: 120px;
+            text-align: center;
+            font-family: 'Courier New', monospace;
+        }
+
+        .presets {
+            margin-bottom: 30px;
+        }
+
+        .preset-title {
+            color: white;
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+        }
+
+        .preset-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(40px, 1fr));
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .preset-color {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .preset-color:hover {
+            transform: scale(1.1);
+            border-color: white;
+        }
+
+        .actions {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            background: rgba(76, 175, 80, 0.3);
+            color: white;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background: rgba(76, 175, 80, 0.5);
+            transform: translateY(-2px);
+        }
+
+        #random-btn {
+            background: rgba(33, 150, 243, 0.3);
+        }
+
+        #random-btn:hover {
+            background: rgba(33, 150, 243, 0.5);
+        }
+
+        #reset-btn {
+            background: rgba(244, 67, 54, 0.3);
+        }
+
+        #reset-btn:hover {
+            background: rgba(244, 67, 54, 0.5);
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 15px 20px;
+            border-radius: 10px;
+            color: white;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        @media (max-width: 600px) {
+            .color-picker-container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .current-color {
+                width: 150px;
+                height: 150px;
+            }
+            
+            .actions {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            button {
+                width: 100%;
+                max-width: 200px;
+            }
+            
+            .preset-grid {
+                grid-template-columns: repeat(auto-fit, minmax(30px, 1fr));
+                gap: 8px;
+            }
+            
+            .preset-color {
+                width: 30px;
+                height: 30px;
+            }
+        }
+
+        /* Animation for color change */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .current-color.changed {
+            animation: pulse 0.5s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="color-picker-container">
+        <h1>🎨 Color Picker</h1>
+        
+        <div class="color-display">
+            <div class="current-color" id="current-color" style="background: #ff6b6b;"></div>
+            
+            <div class="color-info">
+                <div class="color-value" id="color-value">#ff6b6b</div>
+                <button class="color-copy" id="copy-btn">Copy</button>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <label class="control-label">Red</label>
+                <input type="range" id="red-slider" min="0" max="255" value="255">
+                <div class="slider-value" id="red-value">255</div>
+            </div>
+            
+            <div class="control-group">
+                <label class="control-label">Green</label>
+                <input type="range" id="green-slider" min="0" max="255" value="107">
+                <div class="slider-value" id="green-value">107</div>
+            </div>
+            
+            <div class="control-group">
+                <label class="control-label">Blue</label>
+                <input type="range" id="blue-slider" min="0" max="255" value="107">
+                <div class="slider-value" id="blue-value">107</div>
+            </div>
+            
+            <div class="control-group">
+                <label class="control-label">Hex Code</label>
+                <input type="text" class="hex-input" id="hex-input" value="#ff6b6b" maxlength="7">
+            </div>
+        </div>
+
+        <div class="presets">
+            <div class="preset-title">Color Presets</div>
+            <div class="preset-grid" id="preset-grid">
+                <div class="preset-color" style="background: #ff6b6b;" data-color="#ff6b6b"></div>
+                <div class="preset-color" style="background: #4ecdc4;" data-color="#4ecdc4"></div>
+                <div class="preset-color" style="background: #45b7d1;" data-color="#45b7d1"></div>
+                <div class="preset-color" style="background: #f9ca24;" data-color="#f9ca24"></div>
+                <div class="preset-color" style="background: #6c5ce7;" data-color="#6c5ce7"></div>
+                <div class="preset-color" style="background: #a29bfe;" data-color="#a29bfe"></div>
+                <div class="preset-color" style="background: #fd79a8;" data-color="#fd79a8"></div>
+                <div class="preset-color" style="background: #00b894;" data-color="#00b894"></div>
+                <div class="preset-color" style="background: #e17055;" data-color="#e17055"></div>
+                <div class="preset-color" style="background: #2d3436;" data-color="#2d3436"></div>
+            </div>
+        </div>
+
+        <div class="actions">
+            <button id="random-btn">Random Color</button>
+            <button id="reset-btn">Reset</button>
+        </div>
+    </div>
+
+    <div class="notification" id="notification">
+        Color copied to clipboard! 📋
+    </div>
+
+    <script>
+        class ColorPicker {
+            constructor() {
+                this.red = 255;
+                this.green = 107;
+                this.blue = 107;
+                this.initializeApp();
+            }
+
+            initializeApp() {
+                this.initializeElements();
+                this.setupEventListeners();
+                this.updateDisplay();
+            }
+
+            initializeElements() {
+                this.currentColor = document.getElementById('current-color');
+                this.colorValue = document.getElementById('color-value');
+                this.copyBtn = document.getElementById('copy-btn');
+                
+                // Sliders
+                this.redSlider = document.getElementById('red-slider');
+                this.greenSlider = document.getElementById('green-slider');
+                this.blueSlider = document.getElementById('blue-slider');
+                
+                // Slider values
+                this.redValue = document.getElementById('red-value');
+                this.greenValue = document.getElementById('green-value');
+                this.blueValue = document.getElementById('blue-value');
+                
+                // Hex input
+                this.hexInput = document.getElementById('hex-input');
+                
+                // Buttons
+                this.randomBtn = document.getElementById('random-btn');
+                this.resetBtn = document.getElementById('reset-btn');
+                
+                // Presets
+                this.presetGrid = document.getElementById('preset-grid');
+                
+                // Notification
+                this.notification = document.getElementById('notification');
+            }
+
+            setupEventListeners() {
+                // Slider events
+                this.redSlider.addEventListener('input', (e) => {
+                    this.red = parseInt(e.target.value);
+                    this.updateFromSliders();
+                });
+
+                this.greenSlider.addEventListener('input', (e) => {
+                    this.green = parseInt(e.target.value);
+                    this.updateFromSliders();
+                });
+
+                this.blueSlider.addEventListener('input', (e) => {
+                    this.blue = parseInt(e.target.value);
+                    this.updateFromSliders();
+                });
+
+                // Hex input event
+                this.hexInput.addEventListener('input', (e) => {
+                    this.updateFromHex(e.target.value);
+                });
+
+                this.hexInput.addEventListener('blur', (e) => {
+                    this.updateFromHex(e.target.value);
+                });
+
+                this.hexInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        this.updateFromHex(e.target.value);
+                    }
+                });
+
+                // Copy button
+                this.copyBtn.addEventListener('click', () => {
+                    this.copyToClipboard();
+                });
+
+                // Random color
+                this.randomBtn.addEventListener('click', () => {
+                    this.generateRandomColor();
+                });
+
+                // Reset
+                this.resetBtn.addEventListener('click', () => {
+                    this.resetColor();
+                });
+
+                // Preset colors
+                this.presetGrid.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('preset-color')) {
+                        const color = e.target.dataset.color;
+                        this.setColorFromHex(color);
+                    }
+                });
+            }
+
+            updateFromSliders() {
+                this.redValue.textContent = this.red;
+                this.greenValue.textContent = this.green;
+                this.blueValue.textContent = this.blue;
+                
+                this.updateHexFromRGB();
+                this.updateDisplay();
+            }
+
+            updateFromHex(hex) {
+                hex = hex.replace('#', '').toUpperCase();
+                
+                if (hex.length === 3) {
+                    hex = hex.split('').map(c => c + c).join('');
+                }
+                
+                if (hex.length === 6 && /^[0-9A-F]{6}$/i.test(hex)) {
+                    this.red = parseInt(hex.substring(0, 2), 16);
+                    this.green = parseInt(hex.substring(2, 4), 16);
+                    this.blue = parseInt(hex.substring(4, 6), 16);
+                    
+                    this.redSlider.value = this.red;
+                    this.greenSlider.value = this.green;
+                    this.blueSlider.value = this.blue;
+                    
+                    this.redValue.textContent = this.red;
+                    this.greenValue.textContent = this.green;
+                    this.blueValue.textContent = this.blue;
+                    
+                    this.hexInput.value = `#${hex}`;
+                    this.updateDisplay();
+                } else {
+                    // Reset to current color if invalid
+                    this.hexInput.value = this.getHexColor();
+                }
+            }
+
+            updateHexFromRGB() {
+                const hex = `#${this.componentToHex(this.red)}${this.componentToHex(this.green)}${this.componentToHex(this.blue)}`;
+                this.hexInput.value = hex;
+            }
+
+            componentToHex(c) {
+                const hex = c.toString(16);
+                return hex.length === 1 ? '0' + hex : hex;
+            }
+
+            updateDisplay() {
+                const hexColor = this.getHexColor();
+                this.currentColor.style.background = hexColor;
+                this.colorValue.textContent = hexColor;
+                
+                // Add animation
+                this.currentColor.classList.add('changed');
+                setTimeout(() => {
+                    this.currentColor.classList.remove('changed');
+                }, 500);
+            }
+
+            getHexColor() {
+                return `#${this.componentToHex(this.red)}${this.componentToHex(this.green)}${this.componentToHex(this.blue)}`;
+            }
+
+            setColorFromHex(hex) {
+                this.hexInput.value = hex;
+                this.updateFromHex(hex);
+            }
+
+            generateRandomColor() {
+                this.red = Math.floor(Math.random() * 256);
+                this.green = Math.floor(Math.random() * 256);
+                this.blue = Math.floor(Math.random() * 256);
+                
+                this.redSlider.value = this.red;
+                this.greenSlider.value = this.green;
+                this.blueSlider.value = this.blue;
+                
+                this.redValue.textContent = this.red;
+                this.greenValue.textContent = this.green;
+                this.blueValue.textContent = this.blue;
+                
+                this.updateHexFromRGB();
+                this.updateDisplay();
+            }
+
+            resetColor() {
+                this.red = 255;
+                this.green = 107;
+                this.blue = 107;
+                
+                this.redSlider.value = this.red;
+                this.greenSlider.value = this.green;
+                this.blueSlider.value = this.blue;
+                
+                this.redValue.textContent = this.red;
+                this.greenValue.textContent = this.green;
+                this.blueValue.textContent = this.blue;
+                
+                this.updateHexFromRGB();
+                this.updateDisplay();
+            }
+
+            copyToClipboard() {
+                const hexColor = this.getHexColor();
+                navigator.clipboard.writeText(hexColor).then(() => {
+                    this.showNotification('Color copied to clipboard! 📋');
+                }).catch(() => {
+                    this.showNotification('Failed to copy color 😢');
+                });
+            }
+
+            showNotification(message) {
+                this.notification.textContent = message;
+                this.notification.classList.add('show');
+                
+                setTimeout(() => {
+                    this.notification.classList.remove('show');
+                }, 2000);
+            }
+        }
+
+        // Initialize the color picker
+        document.addEventListener('DOMContentLoaded', () => {
+            new ColorPicker();
+        });
+    </script>
+</body>
+</html>

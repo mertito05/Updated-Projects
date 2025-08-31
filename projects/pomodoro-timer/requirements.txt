@@ -1,0 +1,8 @@
+# This project uses Python standard library modules
+# Tkinter is included with Python
+# winsound is Windows-specific for audio alerts
+
+# For cross-platform sound, you might want:
+# pygame==2.5.2
+# or
+# simpleaudio==1.0.4

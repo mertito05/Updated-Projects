@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}{{ post[1] }} - Blog Platform{% endblock %}
+
+{% block content %}
+    <article class="post-detail">
+        <h2>{{ post[1] }}</h2>
+        <p class="meta">By {{ post[3] }} on {{ post[4] }}</p>
+        <div class="content">
+            {{ post[2]|replace('\n', '<br>')|safe }}
+        </div>
+        <a href="{{ url_for('index') }}" class="back-link">← Back to all posts</a>
+    </article>
+{% endblock %}

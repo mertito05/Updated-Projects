@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Password Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: grey;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .password-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            width: 100%;
+            max-width: 800px;
+            text-align: center;
+        }
+
+        h1 {
+            color: white;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .password-display {
+            margin-bottom: 30px;
+        }
+
+        .password-result {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            margin-bottom: 20px;
+        }
+
+        .password-value {
+            color: white;
+            font-size: 1.5rem;
+            font-family: 'Courier New', monospace;
+            word-break: break-all;
+            margin-bottom: 15px;
+        }
+
+        .password-strength {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .strength-label {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1rem;
+        }
+
+        .strength-meter {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            overflow: hidden;
+            flex: 1;
+            max-width: 200px;
+        }
+
+        .strength-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .password-actions {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .settings {
+            margin-bottom: 30px;
+        }
+
+        .setting-group {
+            margin-bottom: 20px;
+        }
+
+        .setting-label {
+            color: white;
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        input[type="range"] {
+            flex: 1;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: white;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .slider-value {
+            color: white;
+            font-size: 1rem;
+            min-width: 30px;
+            text-align: center;
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: white;
+            cursor: pointer;
+        }
+
+        input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #4ecdc4;
+        }
+
+        .generate-btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            background: rgba(76, 175, 80, 0.3);
+            color: white;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 30px;
+        }
+
+        .generate-btn:hover {
+            background: rgba(76, 175, 80, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .history {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .history-title {
+            color: white;
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+        }
+
+        .history-list {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            color: rgba(255, 255, 255, 0.8);
+            padding: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            font-family: 'Courier New', monospace;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .history-item:last-child {
+            border-bottom: none;
+        }
+
+        .history-copy {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            color: white;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 15px 20px;
+            border-radius: 10px;
+            color: white;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        @media (max-width: 600px) {
+            .password-container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .password-value {
+                font-size: 1.2rem;
+            }
+            
+            .password-actions {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .action-btn {
+                width: 100%;
+                max-width: 200px;
+            }
+            
+            .checkbox-group {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .generate-btn {
+                width: 100%;
+            }
+        }
+
+        /* Animation for password generation */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="password-container">
+        <h1>🔐 Password Generator</h1>
+        
+        <div class="password-display">
+            <div class="password-result">
+                <div class="password-value" id="password-value">Click Generate</div>
+                
+                <div class="password-strength">
+                    <span class="strength-label">Strength:</span>
+                    <div class="strength-meter">
+                        <div class="strength-fill" id="strength-fill" style="width: 0%; background: #ff4757;"></div>
+                    </div>
+                    <span class="strength-label" id="strength-text">Very Weak</span>
+                </div>
+                
+                <div class="password-actions">
+                    <button class="action-btn" id="copy-btn">Copy</button>
+                    <button class="action-btn" id="refresh-btn">Refresh</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="settings">
+            <div class="setting-group">
+                <label class="setting-label">Password Length</label>
+                <div class="slider-container">
+                    <input type="range" id="length-slider" min="8" max="32" value="16">
+                    <span class="slider-value" id="length-value">16</span>
+                </div>
+            </div>
+            
+            <div class="setting-group">
+                <label class="setting-label">Include:</label>
+                <div class="checkbox-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="uppercase" checked>
+                        Uppercase Letters
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="lowercase" checked>
+                        Lowercase Letters
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="numbers" checked>
+                        Numbers
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="symbols">
+                        Symbols
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <button class="generate-btn" id="generate-btn">Generate Password</button>
+
+        <div class="history">
+            <div class="history-title">Generated Passwords</div>
+            <div class="history-list" id="history-list">
+                <!-- History items will be added here -->
+            </div>
+        </div>
+    </div>
+
+    <div class="notification" id="notification">
+        Password copied to clipboard! 📋
+    </div>
+
+    <script>
+        class PasswordGenerator {
+            constructor() {
+                this.characters = {
+                    uppercase: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+                    lowercase: 'abcdefghijklmnopqrstuvwxyz',
+                    numbers: '0123456789',
+                    symbols: '!@#$%^&*()_+-=[]{}|;:,.<>?'
+                };
+                
+                this.passwordHistory = [];
+                this.initializeApp();
+            }
+
+            initializeApp() {
+                this.initializeElements();
+                this.setupEventListeners();
+                this.updateLengthDisplay();
+            }
+
+            initializeElements() {
+                this.passwordValue = document.getElementById('password-value');
+                this.strengthFill = document.getElementById('strength-fill');
+                this.strengthText = document.getElementById('strength-text');
+                this.copyBtn = document.getElementById('copy-btn');
+                this.refreshBtn = document.getElementById('refresh-btn');
+                this.lengthSlider = document.getElementById('length-slider');
+                this.lengthValue = document.getElementById('length-value');
+                this.uppercase = document.getElementById('uppercase');
+                this.lowercase = document.getElementById('lowercase');
+                this.numbers = document.getElementById('numbers');
+                this.symbols = document.getElementById('symbols');
+                this.generateBtn = document.getElementById('generate-btn');
+                this.historyList = document.getElementById('history-list');
+                this.notification = document.getElementById('notification');
+            }
+
+            setupEventListeners() {
+                this.lengthSlider.addEventListener('input', () => {
+                    this.updateLengthDisplay();
+                });
+
+                this.copyBtn.addEventListener('click', () => {
+                    this.copyToClipboard();
+                });
+
+                this.refreshBtn.addEventListener('click', () => {
+                    this.generatePassword();
+                });
+
+                this.generateBtn.addEventListener('click', () => {
+                    this.generatePassword();
+                });
+
+                // Add event listeners for checkbox changes to regenerate password
+                [this.uppercase, this.lowercase, this.numbers, this.symbols].forEach(checkbox => {
+                    checkbox.addEventListener('change', () => {
+                        this.generatePassword();
+                    });
+                });
+            }
+
+            updateLengthDisplay() {
+                this.lengthValue.textContent = this.lengthSlider.value;
+            }
+
+            generatePassword() {
+                const length = parseInt(this.lengthSlider.value);
+                const includeUppercase = this.uppercase.checked;
+                const includeLowercase = this.lowercase.checked;
+                const includeNumbers = this.numbers.checked;
+                const includeSymbols = this.symbols.checked;
+
+                // Check if at least one character type is selected
+                if (!includeUppercase && !includeLowercase && !includeNumbers && !includeSymbols) {
+                    this.showNotification('Please select at least one character type!');
+                    return;
+                }
+
+                let characterPool = '';
+                if (includeUppercase) characterPool += this.characters.uppercase;
+                if (includeLowercase) characterPool += this.characters.lowercase;
+                if (includeNumbers) characterPool += this.characters.numbers;
+                if (includeSymbols) characterPool += this.characters.symbols;
+
+                let password = '';
+                const array = new Uint32Array(length);
+                window.crypto.getRandomValues(array);
+
+                for (let i = 0; i < length; i++) {
+                    password += characterPool[array[i] % characterPool.length];
+                }
+
+                this.displayPassword(password);
+                this.updateStrengthIndicator(password);
+                this.addToHistory(password);
+            }
+
+            displayPassword(password) {
+                this.passwordValue.textContent = password;
+                this.passwordValue.classList.add('fade-in');
+                setTimeout(() => this.passwordValue.classList.remove('fade-in'), 300);
+            }
+
+            updateStrengthIndicator(password) {
+                let strength = 0;
+                const length = password.length;
+
+                // Length factor
+                if (length >= 12) strength += 2;
+                else if (length >= 8) strength += 1;
+
+                // Character diversity
+                const hasUppercase = /[A-Z]/.test(password);
+                const hasLowercase = /[a-z]/.test(password);
+                const hasNumbers = /[0-9]/.test(password);
+                const hasSymbols = /[^A-Za-z0-9]/.test(password);
+
+                const diversity = [hasUppercase, hasLowercase, hasNumbers, hasSymbols].filter(Boolean).length;
+                strength += diversity;
+
+                // Update visual indicator
+                let percentage, color, text;
+
+                switch (strength) {
+                    case 0:
+                    case 1:
+                        percentage = 25;
+                        color = '#ff4757';
+                        text = 'Very Weak';
+                        break;
+                    case 2:
+                        percentage = 40;
+                        color = '#ffa502';
+                        text = 'Weak';
+                        break;
+                    case 3:
+                        percentage = 60;
+                        color = '#feca57';
+                        text = 'Medium';
+                        break;
+                    case 4:
+                        percentage = 80;
+                        color = '#2ecc71';
+                        text = 'Strong';
+                        break;
+                    case 5:
+                    case 6:
+                        percentage = 100;
+                        color = '#1dd1a1';
+                        text = 'Very Strong';
+                        break;
+                    default:
+                        percentage = 25;
+                        color = '#ff4757';
+                        text = 'Very Weak';
+                }
+
+                this.strengthFill.style.width = percentage + '%';
+                this.strengthFill.style.background = color;
+                this.strengthText.textContent = text;
+            }
+
+            copyToClipboard() {
+                const password = this.passwordValue.textContent;
+                if (password === 'Click Generate') return;
+
+                navigator.clipboard.writeText(password).then(() => {
+                    this.showNotification('Password copied to clipboard! 📋');
+                }).catch(() => {
+                    this.showNotification('Failed to copy password 😢');
+                });
+            }
+
+            addToHistory(password) {
+                const historyItem = {
+                    password: password,
+                    timestamp: new Date().toLocaleTimeString(),
+                    strength: this.strengthText.textContent
+                };
+
+                this.passwordHistory.unshift(historyItem);
+                this.updateHistoryDisplay();
+
+                // Keep only last 10 history items
+                if (this.passwordHistory.length > 10) {
+                    this.passwordHistory.pop();
+                }
+            }
+
+            updateHistoryDisplay() {
+                this.historyList.innerHTML = '';
+
+                this.passwordHistory.forEach(item => {
+                    const historyItem = document.createElement('div');
+                    historyItem.className = 'history-item';
+
+                    historyItem.innerHTML = `
+                        <span>${item.password}</span>
+                        <div>
+                            <span style="font-size: 0.8rem; opacity: 0.7;">${item.timestamp}</span>
+                            <button class="history-copy" data-password="${item.password}">Copy</button>
+                        </div>
+                    `;
+
+                    // Add copy functionality to history items
+                    const copyBtn = historyItem.querySelector('.history-copy');
+                    copyBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        navigator.clipboard.writeText(item.password).then(() => {
+                            this.showNotification('Password copied! 📋');
+                        });
+                    });
+
+                    this.historyList.appendChild(historyItem);
+                });
+            }
+
+            showNotification(message) {
+                this.notification.textContent = message;
+                this.notification.classList.add('show');
+
+                setTimeout(() => {
+                    this.notification.classList.remove('show');
+                }, 2000);
+            }
+        }
+
+        // Initialize the password generator
+        document.addEventListener('DOMContentLoaded', () => {
+            const generator = new PasswordGenerator();
+            generator.generatePassword(); // Generate initial password
+        });
+    </script>
+</body>
+</html>

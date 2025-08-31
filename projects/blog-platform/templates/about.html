@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}About - Blog Platform{% endblock %}
+
+{% block content %}
+    <h2>About This Blog Platform</h2>
+    <p>This is a simple blog platform built with Flask and SQLite. It allows users to:</p>
+    <ul>
+        <li>Create blog posts with titles, content, and author information</li>
+        <li>View all posts on the homepage</li>
+        <li>Read individual posts in detail</li>
+        <li>Learn more about the platform</li>
+    </ul>
+    <p>The platform uses a clean, responsive design and stores all data in a SQLite database.</p>
+    <p>Features include:</p>
+    <ul>
+        <li>Simple and intuitive user interface</li>
+        <li>Automatic timestamping of posts</li>
+        <li>Responsive design that works on desktop and mobile devices</li>
+        <li>Easy navigation between pages</li>
+    </ul>
+    <a href="{{ url_for('index') }}" class="back-link">← Back to all posts</a>
+{% endblock %}

@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unit Converter</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: grey;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .converter-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            width: 100%;
+            max-width: 800px;
+            text-align: center;
+        }
+
+        h1 {
+            color: white;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .category-selector {
+            margin-bottom: 30px;
+        }
+
+        .category-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .category-btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .category-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .category-btn.active {
+            background: rgba(76, 175, 80, 0.3);
+            border: 2px solid rgba(76, 175, 80, 0.6);
+        }
+
+        .converter {
+            margin-bottom: 30px;
+        }
+
+        .converter-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        input, select {
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            font-size: 1rem;
+        }
+
+        input {
+            width: 120px;
+            text-align: center;
+        }
+
+        select {
+            min-width: 100px;
+        }
+
+        .equals {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .result {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .result-label {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+        }
+
+        .result-value {
+            color: white;
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        .history {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .history-title {
+            color: white;
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+        }
+
+        .history-list {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            color: rgba(255, 255, 255, 0.8);
+            padding: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .history-item:last-child {
+            border-bottom: none;
+        }
+
+        @media (max-width: 600px) {
+            .converter-container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .converter-row {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            input, select {
+                width: 100%;
+                max-width: 200px;
+            }
+            
+            .category-buttons {
+                flex-direction: column;
+            }
+            
+            .category-btn {
+                width: 100%;
+            }
+        }
+
+        /* Animation for result */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="converter-container">
+        <h1>📏 Unit Converter</h1>
+        
+        <div class="category-selector">
+            <div class="category-buttons" id="category-buttons">
+                <button class="category-btn active" data-category="length">Length</button>
+                <button class="category-btn" data-category="weight">Weight</button>
+                <button class="category-btn" data-category="temperature">Temperature</button>
+                <button class="category-btn" data-category="volume">Volume</button>
+                <button class="category-btn" data-category="time">Time</button>
+            </div>
+        </div>
+
+        <div class="converter" id="converter">
+            <!-- Converter content will be dynamically generated -->
+        </div>
+
+        <div class="history">
+            <div class="history-title">Conversion History</div>
+            <div class="history-list" id="history-list">
+                <!-- History items will be added here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class UnitConverter {
+            constructor() {
+                this.categories = {
+                    length: {
+                        units: ['meters', 'kilometers', 'centimeters', 'millimeters', 'miles', 'yards', 'feet', 'inches'],
+                        conversions: {
+                            meters: 1,
+                            kilometers: 0.001,
+                            centimeters: 100,
+                            millimeters: 1000,
+                            miles: 0.000621371,
+                            yards: 1.09361,
+                            feet: 3.28084,
+                            inches: 39.3701
+                        }
+                    },
+                    weight: {
+                        units: ['kilograms', 'grams', 'milligrams', 'pounds', 'ounces', 'tons'],
+                        conversions: {
+                            kilograms: 1,
+                            grams: 1000,
+                            milligrams: 1000000,
+                            pounds: 2.20462,
+                            ounces: 35.274,
+                            tons: 0.00110231
+                        }
+                    },
+                    temperature: {
+                        units: ['celsius', 'fahrenheit', 'kelvin'],
+                        conversions: {}
+                    },
+                    volume: {
+                        units: ['liters', 'milliliters', 'gallons', 'quarts', 'pints', 'cups', 'fluid ounces'],
+                        conversions: {
+                            liters: 1,
+                            milliliters: 1000,
+                            gallons: 0.264172,
+                            quarts: 1.05669,
+                            pints: 2.11338,
+                            cups: 4.22675,
+                            'fluid ounces': 33.814
+                        }
+                    },
+                    time: {
+                        units: ['seconds', 'minutes', 'hours', 'days', 'weeks', 'months', 'years'],
+                        conversions: {
+                            seconds: 1,
+                            minutes: 1/60,
+                            hours: 1/3600,
+                            days: 1/86400,
+                            weeks: 1/604800,
+                            months: 1/2628000,
+                            years: 1/31536000
+                        }
+                    }
+                };
+                
+                this.currentCategory = 'length';
+                this.conversionHistory = [];
+                this.initializeApp();
+            }
+
+            initializeApp() {
+                this.initializeElements();
+                this.setupEventListeners();
+                this.generateConverter();
+            }
+
+            initializeElements() {
+                this.categoryButtons = document.getElementById('category-buttons');
+                this.converter = document.getElementById('converter');
+                this.historyList = document.getElementById('history-list');
+            }
+
+            setupEventListeners() {
+                this.categoryButtons.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('category-btn')) {
+                        this.setCategory(e.target.dataset.category);
+                    }
+                });
+            }
+
+            setCategory(category) {
+                this.currentCategory = category;
+                
+                // Update active button
+                document.querySelectorAll('.category-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                document.querySelector(`[data-category="${category}"]`).classList.add('active');
+                
+                this.generateConverter();
+            }
+
+            generateConverter() {
+                const category = this.categories[this.currentCategory];
+                
+                if (this.currentCategory === 'temperature') {
+                    this.converter.innerHTML = `
+                        <div class="converter-row">
+                            <input type="number" id="input-value" value="0" step="0.1">
+                            <select id="from-unit">
+                                <option value="celsius">Celsius</option>
+                                <option value="fahrenheit">Fahrenheit</option>
+                                <option value="kelvin">Kelvin</option>
+                            </select>
+                            <span class="equals">=</span>
+                            <div class="result">
+                                <div class="result-label">Result</div>
+                                <div class="result-value" id="result-value">0</div>
+                            </div>
+                            <select id="to-unit">
+                                <option value="celsius">Celsius</option>
+                                <option value="fahrenheit">Fahrenheit</option>
+                                <option value="kelvin">Kelvin</option>
+                            </select>
+                        </div>
+                    `;
+                } else {
+                    this.converter.innerHTML = `
+                        <div class="converter-row">
+                            <input type="number" id="input-value" value="0" step="0.1">
+                            <select id="from-unit">
+                                ${category.units.map(unit => `<option value="${unit}">${this.formatUnitName(unit)}</option>`).join('')}
+                            </select>
+                            <span class="equals">=</span>
+                            <div class="result">
+                                <div class="result-label">Result</div>
+                                <div class="result-value" id="result-value">0</div>
+                            </div>
+                            <select id="to-unit">
+                                ${category.units.map(unit => `<option value="${unit}">${this.formatUnitName(unit)}</option>`).join('')}
+                            </select>
+                        </div>
+                    `;
+                }
+                
+                this.setupConverterEventListeners();
+                this.updateResult();
+            }
+
+            setupConverterEventListeners() {
+                const input = document.getElementById('input-value');
+                const fromUnit = document.getElementById('from-unit');
+                const toUnit = document.getElementById('to-unit');
+                
+                const update = () => this.updateResult();
+                
+                input.addEventListener('input', update);
+                fromUnit.addEventListener('change', update);
+                toUnit.addEventListener('change', update);
+            }
+
+            updateResult() {
+                const input = document.getElementById('input-value');
+                const fromUnit = document.getElementById('from-unit');
+                const toUnit = document.getElementById('to-unit');
+                const result = document.getElementById('result-value');
+                
+                const value = parseFloat(input.value) || 0;
+                const from = fromUnit.value;
+                const to = toUnit.value;
+                
+                let convertedValue;
+                
+                if (this.currentCategory === 'temperature') {
+                    convertedValue = this.convertTemperature(value, from, to);
+                } else {
+                    convertedValue = this.convertStandard(value, from, to);
+                }
+                
+                result.textContent = convertedValue.toFixed(6);
+                result.classList.add('fade-in');
+                setTimeout(() => result.classList.remove('fade-in'), 300);
+                
+                // Add to history
+                this.addToHistory(value, from, to, convertedValue);
+            }
+
+            convertStandard(value, from, to) {
+                const category = this.categories[this.currentCategory];
+                const fromFactor = category.conversions[from];
+                const toFactor = category.conversions[to];
+                
+                // Convert to base unit first, then to target unit
+                const baseValue = value / fromFactor;
+                return baseValue * toFactor;
+            }
+
+            convertTemperature(value, from, to) {
+                if (from === to) return value;
+                
+                // Convert to Celsius first
+                let celsius;
+                switch (from) {
+                    case 'celsius':
+                        celsius = value;
+                        break;
+                    case 'fahrenheit':
+                        celsius = (value - 32) * 5/9;
+                        break;
+                    case 'kelvin':
+                        celsius = value - 273.15;
+                        break;
+                }
+                
+                // Convert from Celsius to target unit
+                switch (to) {
+                    case 'celsius':
+                        return celsius;
+                    case 'fahrenheit':
+                        return (celsius * 9/5) + 32;
+                    case 'kelvin':
+                        return celsius + 273.15;
+                }
+            }
+
+            formatUnitName(unit) {
+                return unit.charAt(0).toUpperCase() + unit.slice(1);
+            }
+
+            addToHistory(value, from, to, result) {
+                const historyItem = {
+                    value: value,
+                    from: from,
+                    to: to,
+                    result: result,
+                    category: this.currentCategory,
+                    timestamp: new Date().toLocaleTimeString()
+                };
+                
+                this.conversionHistory.unshift(historyItem);
+                this.updateHistoryDisplay();
+                
+                // Keep only last 10 history items
+                if (this.conversionHistory.length > 10) {
+                    this.conversionHistory.pop();
+                }
+            }
+
+            updateHistoryDisplay() {
+                this.historyList.innerHTML = '';
+                
+                this.conversionHistory.forEach(item => {
+                    const historyItem = document.createElement('div');
+                    historyItem.className = 'history-item';
+                    
+                    historyItem.textContent = 
+                        `${item.timestamp}: ${item.value} ${item.from} → ${item.result.toFixed(4)} ${item.to}`;
+                    
+                    this.historyList.appendChild(historyItem);
+                });
+            }
+        }
+
+        // Initialize the unit converter
+        document.addEventListener('DOMContentLoaded', () => {
+            new UnitConverter();
+        });
+    </script>
+</body>
+</html>

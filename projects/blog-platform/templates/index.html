@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Blog Platform{% endblock %}
+
+{% block content %}
+    <h2>Latest Posts</h2>
+    
+    {% if posts %}
+        <div class="posts">
+            {% for post in posts %}
+                <article class="post">
+                    <h3><a href="{{ url_for('post_detail', post_id=post[0]) }}">{{ post[1] }}</a></h3>
+                    <p class="meta">By {{ post[3] }} on {{ post[4] }}</p>
+                    <p>{{ post[2][:200] }}{% if post[2]|length > 200 %}...{% endif %}</p>
+                    <a href="{{ url_for('post_detail', post_id=post[0]) }}" class="read-more">Read more</a>
+                </article>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>No posts yet. <a href="{{ url_for('create_post') }}">Create the first post!</a></p>
+    {% endif %}
+{% endblock %}

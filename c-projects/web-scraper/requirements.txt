@@ -1,0 +1,9 @@
+# Requirements for Web Scraper
+
+# Uncomment the following lines if using external libraries
+# libcurl: for HTTP requests
+# libxml2: for HTML parsing
+
+# Install dependencies using your package manager
+# For example, on Ubuntu:
+# sudo apt-get install libcurl4-openssl-dev libxml2-dev

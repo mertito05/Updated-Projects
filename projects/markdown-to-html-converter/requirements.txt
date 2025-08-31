@@ -1,0 +1,6 @@
+# This project uses only Python standard library modules
+# No additional packages required
+
+# For more advanced Markdown parsing, you might want:
+# markdown2==2.4.10
+# mistune==3.0.2
